@@ -9,31 +9,94 @@ import {
 } from "react-native";
 import { TextInput } from "react-native-gesture-handler";
 import React, { useState, useEffect } from "react";
+
+// import MapView, { Marker } from "react-native-maps";
+import * as Location from "expo-location";
+import { Camera } from "expo-camera";
+import * as MediaLibrary from "expo-media-library"; 
   
 const CreatePostsScreen = ({ navigation }) => {
+  const [hasPermission, setHasPermission] = useState(null);
+  const [cameraRef, setCameraRef] = useState(null);
+  const [type, setType] = useState(Camera.Constants.Type.back);
+
   const [focusedInput, setFocusedInput] = useState(null);
   
-  const [image, setImage] = useState("");
+  const [photo, setPhoto] = useState("");
   const [title, setTitle] = useState("");
-  const [location, setLocation] = useState("");
-  
-  const [isImageAdd, setIsImageAdd] = useState(false);
-  const [isTitleEntered, setIsTitleEntered] = useState(false);
-  const [isLocationEntered, setIsLocationEntered] = useState(false);
+  const [locationName, setLocationName] = useState("");
+  const [geolocation, setGeolocation] = useState("");
+  // const [isImageAdd, setIsImageAdd] = useState(false);
+  // const [isTitleEntered, setIsTitleEntered] = useState(false);
+  // const [isLocationEntered, setIsLocationEntered] = useState(false);
   const [isFormValid, setIsFormValid] = useState(false);
-  
+
   useEffect(() => {
-    setIsFormValid(image !== "" && isTitleEntered && isLocationEntered);
-  }, [image, isTitleEntered, isLocationEntered]);
+    try {
+      (async () => {
+        const { status } = await Camera.requestCameraPermissionsAsync();
+        await MediaLibrary.requestPermissionsAsync();
   
-  const pablishPost = () => {
+        setHasPermission(status === "granted");
+      })();
+    } catch (error) {
+      console.log('Error permissions camera: ', error.message);
+    }
+  }, []);
+
+  useEffect(() => {
+    try {
+      (async () => {
+        let { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== "granted") {
+          console.log("Permission to access location was denied");
+        }
+  
+        let location = await Location.getCurrentPositionAsync({});
+        const coords = {
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+        };
+        setGeolocation(coords);
+      })();
+    } catch (error) {
+      console.log('Error permissions location: ', error.message);
+    }
+  }, []);
+
+  useEffect(() => {
+    setIsFormValid(photo !== "" && title && locationName);
+  }, [photo, title, locationName]);
+
+  if (hasPermission === null) {
+    return <View />;
+  }
+  if (hasPermission === false) {
+    return <Text>No access to camera</Text>;
+  }
+  
+  const takePhoto = async () => {
+    if (cameraRef) {
+      const { uri } = await cameraRef.takePictureAsync();
+      setPhoto(uri);
+    }
+  };
+
+  const publishPost = () => {
     if (isFormValid) {
-      setImage(image);
-      setTitle(title);
-      setLocation(location);
+      // setPhoto(photo);
+      // setTitle(title);
+      // setLocationName(locationName);
+      // setGeolocation(geolocation);
   
       navigation.navigate("Home");
     }
+  };
+
+  const deletePost = () => {
+    setPhoto('');
+    setTitle('');
+    setLocationName('');
   };
   
   return (
@@ -56,21 +119,50 @@ const CreatePostsScreen = ({ navigation }) => {
         <View style={styles.mainContent}>
           <View style={styles.publicationContainer}>
             <View style={styles.imageContainer}>
+              <Camera
+                style={styles.camera}
+                type={type}
+                ratio={"1:1"}
+                ref={setCameraRef}
+              >
+              <View style={styles.photoView}>
               <TouchableOpacity
                 style={styles.cameraButton}
-                // onPress={addPhoto}
+                onPress={takePhoto}
               >
-                <Image
-                  style={styles.cameraImage}
-                  source={require("../images/camera.png")}
-                />
+                <View style={styles.cameraButtonIcon}>
+                  <Image
+                    style={styles.cameraImage}
+                    source={require("../images/camera.png")}
+                    />
+                </View>
               </TouchableOpacity>
+              {photo && (
+                    <Image
+                      style={styles.previewImageThmb}
+                      source={{ uri: photo }}
+                    />
+                  )}
+                  <TouchableOpacity
+                    style={styles.cameraRotate}
+                    onPress={() => {
+                      setType(
+                        type === Camera.Constants.Type.back
+                          ? Camera.Constants.Type.front
+                          : Camera.Constants.Type.back
+                      );
+                    }}
+                  ></TouchableOpacity>
+              </View>
+              </Camera>
             </View>
-  
+            <TouchableOpacity onPress={deletePost}>         
             <Text style={styles.text}>
-              {isImageAdd ? "Редагувати фото" : "Завантажте фото"}
+              {photo ? "Редагувати фото" : "Завантажте фото"}
             </Text>
+            </TouchableOpacity>          
           </View>
+
           <View style={styles.inputHolder}>
             <TextInput
               style={[
@@ -82,11 +174,9 @@ const CreatePostsScreen = ({ navigation }) => {
               placeholder="Назва..."
               onChangeText={(text) => {
                 setTitle(text);
-                setIsTitleEntered(text.trim() !== "");
-              //   console.log("Title:", text);
               }}
-              onFocus={() => setFocusedInput("title")}
-              onBlur={() => setFocusedInput(null)}
+              onFocus={() => setFocusedInput(true)}
+              onBlur={() => setFocusedInput(false)}
             />
           </View>
           <View style={styles.inputHolder}>
@@ -97,30 +187,29 @@ const CreatePostsScreen = ({ navigation }) => {
             <TextInput
               style={[
                 [styles.inputMap],
-                focusedInput === "location" && [styles.inputFocused],
+                focusedInput === "locationName" && [styles.inputFocused],
               ]}
-              name="location"
-              value={location}
+              name="locationName"
+              value={locationName}
               placeholder="Місцевість"
               onChangeText={(text) => {
-                setLocation(text);
-                setIsLocationEntered(text.trim() !== "");
-              //   console.log("Location:", text);
+                setLocationName(text);
               }}
-              onFocus={() => setFocusedInput("location")}
-              onBlur={() => setFocusedInput(null)}
+              onFocus={() => setFocusedInput(true)}
+              onBlur={() => setFocusedInput(false)}
             />
           </View>
           <TouchableOpacity
-            style={[styles.buttonValid, !isFormValid && styles.button]}
-            onPress={pablishPost}
+            style={[styles.button, isFormValid && styles.buttonValid ]}
+            onPress={publishPost}
             disabled={!isFormValid}
           >
             <Text style={styles.buttonText}>Опублікувати</Text>
           </TouchableOpacity>
         </View>
+
         <View style={styles.containerButtonDel}>
-          <TouchableOpacity style={styles.buttonDel}>
+          <TouchableOpacity style={styles.buttonDel} onPress={deletePost}>
             <Image
               style={styles.buttonDelIcon}
               source={require("../images/trash.png")}
@@ -148,6 +237,16 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     hesght: 44,
   },
+  buttonReturn: {
+    position: "absolute",
+    marginTop: 10,
+    height: 24,
+    left: 16,
+  },
+  iconReturn: {
+    width: 24,
+    height: 24,
+  },
   titleContainer: {
     width: 175,
     height: 44,
@@ -163,16 +262,6 @@ const styles = StyleSheet.create({
     fontFamily: "Roboto-Medium",
     paddingBottom: 11,
     paddingTop: 11,
-  },
-  buttonReturn: {
-    position: "absolute",
-    marginTop: 10,
-    height: 24,
-    left: 16,
-  },
-  iconReturn: {
-    width: 24,
-    height: 24,
   },
   mainContent: {
     paddingTop: 32,
@@ -196,6 +285,15 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginBottom: 8,
   },
+  camera: {
+    flex: 1,
+    resizeMode: "contain",
+  },
+  photoView: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
   cameraButton: {
     paddingTop: 18,
     paddingLeft: 18,
@@ -204,13 +302,32 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderRadius: 50,
   },
+  cameraButtonIcon: {
+    color: "#FFFFFF",
+  },
   cameraImage: {
     width: 24,
     height: 24,
   },
+  previewImageThmb: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    width: "100%",
+    height: "100%",
+  },
+  cameraRotate: {
+    position: 'absolute',
+    top: 16,
+    left: 16,
+  },
   text: {
     fontFamily: "Roboto-Regular",
     color: "#BDBDBD",
+  },
+  inputHolder: {
+    position: "relative",
+    marginBottom: 16,
   },
   input: {
     fontFamily: "Roboto-Regular",
@@ -232,10 +349,6 @@ const styles = StyleSheet.create({
     height: 24,
     marginTop: -12,
   },
-  inputHolder: {
-    position: "relative",
-    marginBottom: 16,
-  },
   inputMap: {
     minWidth: 343,
     borderColor: "#E8E8E8",
@@ -256,12 +369,15 @@ const styles = StyleSheet.create({
   },
   buttonValid: {
     backgroundColor: "#FF6C00",
-    color: "#fff",
+    color: "#FFFFFF",
   },
   buttonText: {
     textAlign: "center",
     fontFamily: "Roboto-Regular",
     color: "#BDBDBD",
+  },
+  buttonTextValid: {
+    color: '#FFFFFF'
   },
   containerButtonDel: {
     marginTop: "auto",
