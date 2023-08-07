@@ -43,21 +43,23 @@ const PostsScreen = ({ navigation }) => {
             <View style={styles.postContent}>
               <Text style={styles.postTitle}>Ліс</Text>
               <View style={styles.postMeta}>
-                <View style={styles.postComments}>
+                <TouchableOpacity style={styles.postComments} onPress={() => navigation.navigate("Comments")}>
                   <Image
                     style={styles.postIcon}
                     source={require("../images/comments-o.png")}
                   />
                   <Text style={styles.postCount}>0</Text>
-                </View>
+                </TouchableOpacity>
                 <View style={styles.postLocationInfo}>
                   <Image
                     style={styles.postIcon}
                     source={require("../images/map.png")}
                   />
+                  <TouchableOpacity onPress={() => navigation.navigate("Map")}>
                   <Text style={styles.postLocationAddress}>
                     Ivano-Frankivs'k Region, Ukraine
                   </Text>
+                  </TouchableOpacity>
                 </View>
               </View>
             </View>
@@ -75,7 +77,7 @@ const PostsScreen = ({ navigation }) => {
             {/* <View style={styles.postContent}>
               <Text style={styles.postTitle}>Захід на Чорному морі</Text>
               <View style={styles.postMeta}>
-                <View style={styles.postComments}>
+                <View style={styles.postComments} onPress={() => navigation.navigate("Comments")}>
                   <Image
                     style={styles.postIcon}
                     source={require("../images/comments-o.png")}
@@ -87,9 +89,11 @@ const PostsScreen = ({ navigation }) => {
                     style={styles.postIcon}
                     source={require("../images/map.png")}
                   />
+                  <TouchableOpacity onPress={() => navigation.navigate("Map")}>
                   <Text style={styles.postLocationAddress}>
                     Odesa Region, Ukraine
                   </Text>
+                  </TouchableOpacity>
                 </View>
               </View>
             </View> */}

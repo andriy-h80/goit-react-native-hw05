@@ -51,8 +51,7 @@ const CommentsScreen = ({navigation}) => {
             <Text style={styles.titleContainerText}>Коментарі</Text>
           </View>
         </View>
-        <ScrollView contentContainerStyle={styles.scrollContent}>
-  
+        <ScrollView contentContainerStyle={styles.scrollContent}> 
           <View style={styles.mainContent}>
             <View style={styles.publicationContainer}>
               <View style={styles.imageContainer}>
@@ -142,9 +141,10 @@ export default CommentsScreen;
   
 const styles = StyleSheet.create({
   container: {
-    position: 'relative',
-    backgroundColor: "#fff",
     flex: 1,
+    backgroundColor: "#FFFFFF",
+    paddingTop: 44,
+    paddingBottom: 22,
   },
   header: {
     position: "relative",
@@ -252,7 +252,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     padding: 16,
-    backgroundColor: '#fff',
+    backgroundColor: '#FFFFFF',
     right: 0,
   },
   input: {
@@ -270,10 +270,9 @@ const styles = StyleSheet.create({
   },
   inputFocused: {
     borderColor: "#FF6C00",
-    backgroundColor: "#fff",
+    backgroundColor: "#FFFFFF",
     color: "#000",
   },
-  
   buttonPost: {
     position: 'absolute',
     right: 24,

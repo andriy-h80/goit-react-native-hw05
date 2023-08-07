@@ -32,9 +32,9 @@ export default function App() {
         <MainStack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }}/>
         <MainStack.Screen name="Home" component={Home} options={{ headerShown: false }} />
         <MainStack.Screen name="PostsScreen" component={PostsScreen} />
-        <MainStack.Screen name="Map" component={MapScreen} />
+        <MainStack.Screen name="Map" component={MapScreen} options={{ headerShown: false }}/>
         <MainStack.Screen name="CreatePosts" component={CreatePostsScreen} options={{ headerShown: false }} />
-        <MainStack.Screen name="Comments" component={CommentsScreen} />
+        <MainStack.Screen name="Comments" component={CommentsScreen} options={{ headerShown: false }} />
         <MainStack.Screen name="Profile" component={ProfileScreen}  options={{ headerShown: false }} />
      </MainStack.Navigator>
   </NavigationContainer>

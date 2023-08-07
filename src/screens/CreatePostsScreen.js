@@ -9,8 +9,6 @@ import {
 } from "react-native";
 import { TextInput } from "react-native-gesture-handler";
 import React, { useState, useEffect } from "react";
-
-// import MapView, { Marker } from "react-native-maps";
 import * as Location from "expo-location";
 import { Camera } from "expo-camera";
 import * as MediaLibrary from "expo-media-library"; 
@@ -26,9 +24,6 @@ const CreatePostsScreen = ({ navigation }) => {
   const [title, setTitle] = useState("");
   const [locationName, setLocationName] = useState("");
   const [geolocation, setGeolocation] = useState("");
-  // const [isImageAdd, setIsImageAdd] = useState(false);
-  // const [isTitleEntered, setIsTitleEntered] = useState(false);
-  // const [isLocationEntered, setIsLocationEntered] = useState(false);
   const [isFormValid, setIsFormValid] = useState(false);
 
   useEffect(() => {
@@ -84,11 +79,13 @@ const CreatePostsScreen = ({ navigation }) => {
 
   const publishPost = () => {
     if (isFormValid) {
-      // setPhoto(photo);
-      // setTitle(title);
-      // setLocationName(locationName);
-      // setGeolocation(geolocation);
-  
+      const post = {
+        photo,
+        title,
+        locationName,
+        geolocation,
+      };
+
       navigation.navigate("Home");
     }
   };
@@ -198,16 +195,20 @@ const CreatePostsScreen = ({ navigation }) => {
               onFocus={() => setFocusedInput(true)}
               onBlur={() => setFocusedInput(false)}
             />
+            {geolocation.latitude && geolocation.longitude && (
+              <Text>
+                Latitude: {geolocation.latitude}, Longitude: {geolocation.longitude}
+              </Text>
+            )}
           </View>
           <TouchableOpacity
             style={[styles.button, isFormValid && styles.buttonValid ]}
             onPress={publishPost}
             disabled={!isFormValid}
           >
-            <Text style={styles.buttonText}>Опублікувати</Text>
+            <Text style={[styles.buttonText, isFormValid && styles.buttonTextValid]}>Опублікувати</Text>
           </TouchableOpacity>
         </View>
-
         <View style={styles.containerButtonDel}>
           <TouchableOpacity style={styles.buttonDel} onPress={deletePost}>
             <Image
@@ -226,7 +227,7 @@ export default CreatePostsScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: "#FFFFFF",
     paddingTop: 44,
     paddingBottom: 22,
   },
@@ -287,7 +288,7 @@ const styles = StyleSheet.create({
   },
   camera: {
     flex: 1,
-    resizeMode: "contain",
+    width: "100%",
   },
   photoView: {
     flex: 1,
@@ -299,7 +300,7 @@ const styles = StyleSheet.create({
     paddingLeft: 18,
     paddingRight: 18,
     paddingBottom: 18,
-    backgroundColor: "#fff",
+    backgroundColor: "#FFFFFF",
     borderRadius: 50,
   },
   cameraButtonIcon: {
